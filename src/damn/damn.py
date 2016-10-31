@@ -1,41 +1,20 @@
-import click
+
 import logging
 import re
+
+import click
 import requests
+
+from . import config
+from . import usgs
 
 
 logging.basicConfig(level=logging.DEBUG)
 
 
-SITE = 12345
-URL = 'http://waterdata.usgs.gov/nwis/uv?cb_00060=on&format=rdb&site_no={site_no}&period=1'.format(site_no=SITE)
-
-
-def fetch_dam_data(site=SITE):
-    linere = re.compile(r'^.*\t\d{4}-\d{2}-\d{2} \d{2}:\d{2}\t.*$')
-
-    try:
-        tab_data = requests.get(URL).text
-        # print(tab_data)
-    except Exception as ex:
-        logging.error('Unable to fetch dam discharge data.')
-        raise
-
-    try:
-        data_field = 4
-        measurements = [measurement.split('\t')[data_field]
-                        for measurement in tab_data.split('\n')
-                        if linere.match(measurement)]
-    except Exception as ex:
-        logging.error('Unable to parse the discharge data.')
-        raise
-
-    return int(measurements[-1])
-
-
-def send_alert(message):
-    post_data = {'token': 'PUSHOVER_TOKEN',
-                 'user': 'PUSHOVER_USER',
+def send_alert(message, token, user):
+    post_data = {'token': token,
+                 'user': user,
                  'message': message}
 
     logging.debug('post data: {0}'.format(post_data))
@@ -49,15 +28,26 @@ def send_alert(message):
         print(push_result.reason, push_result.text)
 
 
-@click.command()
-@click.option('-l', '--level', default=7000,
-              help='the discharge amount to alert on')
-def main(level):
-    current_discharge = fetch_dam_data()
-    print(current_discharge)
+class DamnApp(object):
+    def __init__(self):
+        """App Object. This controls everything."""
+        self.config = config.Config()
+        self.usgs = usgs.USGS(self.config.dam_id)
+        print('app token: {0}'.format(self.config.app_token))
+        print('user id: {0}'.format(self.config.user_id))
 
-    if current_discharge > level:
-        send_alert('ALERT: Dam discharge is over {level} ft^3/s'.format(level=current_discharge))
+    def run(self):
+        current_discharge = self.usgs.fetch_dam_data()
+        if current_discharge > self.config.last_discharge_amount:
+            send_alert('ALERT: Dam discharge is over {level} ft^3/s'.format(level=current_discharge),
+                       self.config.app_token, self.config.user_id)
+
+
+
+@click.command()
+def main():
+    app = DamnApp()
+    app.run()
 
 
 if __name__ == '__main__':
