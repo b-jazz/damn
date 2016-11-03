@@ -10,6 +10,7 @@ from . import usgs
 
 
 logging.basicConfig(level=logging.DEBUG)
+logging.getLogger('requests').setLevel(logging.ERROR)
 
 
 def send_alert(message, token, user):
@@ -33,8 +34,10 @@ class DamnApp(object):
         """App Object. This controls everything."""
         self.config = config.Config()
         self.usgs = usgs.USGS(self.config.dam_id)
-        print('app token: {0}'.format(self.config.app_token))
-        print('user id: {0}'.format(self.config.user_id))
+        self.log = logging.getLogger(__name__)
+
+        self.log.debug('app token: {0}'.format(self.config.app_token))
+        self.log.debug('user id: {0}'.format(self.config.user_id))
 
     def run(self):
         current_discharge = self.usgs.fetch_dam_data()
