@@ -49,6 +49,10 @@ class DamnApp(object):
 
 @click.command()
 def main():
+    """
+    Pull USGS dam data for the given dam and send an alert if it is above a configured value.
+    """
+
     app = DamnApp()
     app.run()
 
