@@ -9,9 +9,6 @@ from . import config
 from . import usgs
 
 
-logging.basicConfig(level=logging.DEBUG)
-logging.getLogger('requests').setLevel(logging.ERROR)
-
 
 def send_alert(message, token, user):
     post_data = {'token': token,
@@ -30,14 +27,26 @@ def send_alert(message, token, user):
 
 
 class DamnApp(object):
-    def __init__(self):
+    def __init__(self, debug):
         """App Object. This controls everything."""
+        self.setup_logging(debug)
         self.config = config.Config()
         self.usgs = usgs.USGS(self.config.dam_id)
-        self.log = logging.getLogger(__name__)
 
         self.log.debug('app token: {0}'.format(self.config.app_token))
         self.log.debug('user id: {0}'.format(self.config.user_id))
+
+    def setup_logging(self, debug):
+        if debug:
+            # we want to turn on debug level logging. also, leave the requests logger at debug as well.
+            logging.basicConfig(level=logging.DEBUG)
+        else:
+            logging.basicConfig()
+            # if we aren't debugging, quiet down the requests logger
+            logging.getLogger('requests').setLevel(logging.ERROR)
+
+        self.log = logging.getLogger(__name__)
+
 
     def run(self):
         current_discharge = self.usgs.fetch_dam_data()
@@ -48,12 +57,14 @@ class DamnApp(object):
 
 
 @click.command()
-def main():
+@click.option('--debug/--no-debug', default=False,
+              help='Outputs additional debugging information')
+def main(debug):
     """
     Pull USGS dam data for the given dam and send an alert if it is above a configured value.
     """
 
-    app = DamnApp()
+    app = DamnApp(debug)
     app.run()
 
 
