@@ -48,9 +48,17 @@ class DamnApp(object):
 
     def run(self):
         current_discharge = self.usgs.fetch_dam_data()
-        if current_discharge > self.config.last_discharge_amount:
-            send_alert('ALERT: Dam discharge is over {level} ft^3/s'.format(level=current_discharge),
+        if current_discharge > self.config.next_discharge_amount:
+            # set new discharge rate in config
+            new_threshold = current_discharge + self.config.discharge_every
+            msg_fmt = (u'ALERT: Dam discharge is currently {level} ft\xB3/s, '
+                       'which is over the previous threshold of {threshold} ft\xB3/s. '
+                       'Next alert at {new_threshold} ft\xB3/s.')
+            send_alert(msg_fmt.format(level=current_discharge,
+                                      threshold=self.config.next_discharge_amount,
+                                      new_threshold=new_threshold),
                        self.config.app_token, self.config.user_id)
+            self.config.next_discharge_amount = new_threshold
 
 
 

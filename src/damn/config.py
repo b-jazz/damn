@@ -5,7 +5,9 @@ class Config(object):
     def __init__(self):
         """Read in the default config file if it exists."""
         self.config = configparser.ConfigParser()
-        self.config.read_file(open(os.path.expanduser('~/.damnrc')))
+        self.config_filename = os.path.expanduser('~/.damnrc')
+        with open(self.config_filename, 'r') as cf_fp:
+            self.config.read_file(cf_fp)
 
     @property
     def dam_id(self):
@@ -20,6 +22,19 @@ class Config(object):
         return self.config.get('pushover', 'user_id')
 
     @property
-    def last_discharge_amount(self):
-        lda = self.config.get('alert_levels', 'last_discharge_amount', fallback='1000')
+    def next_discharge_amount(self):
+        lda = self.config.get('alert_levels', 'next_discharge_amount', fallback='1000')
         return int(lda)
+
+    @property
+    def discharge_every(self):
+        discharge_every = self.config.get('alert_levels', 'discharge_every', fallback='1000')
+        return int(discharge_every)
+
+    @next_discharge_amount.setter
+    def next_discharge_amount(self, value):
+        self.config.set('alert_levels', 'next_discharge_amount', str(value))
+        # open the config file
+        with open(self.config_filename, 'w') as cf_fp:
+            # write out the new config
+            self.config.write(cf_fp)
