@@ -9,7 +9,6 @@ from . import config
 from . import usgs
 
 
-
 def send_alert(message, token, user):
     post_data = {'token': token,
                  'user': user,
@@ -47,7 +46,6 @@ class DamnApp(object):
 
         self.log = logging.getLogger(__name__)
 
-
     def run(self):
         current_discharge = self.usgs.fetch_dam_data()
         if current_discharge > self.config.last_discharge_amount:
@@ -57,7 +55,7 @@ class DamnApp(object):
 
 
 @click.command()
-@click.option('--debug/--no-debug', default=False,
+@click.option('--debug', default=False, is_flag=True,
               help='Outputs additional debugging information')
 def main(debug):
     """
