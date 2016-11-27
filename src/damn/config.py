@@ -1,9 +1,11 @@
 import configparser
+import logging
 import os.path
 
 class Config(object):
     def __init__(self):
         """Read in the default config file if it exists."""
+        self.log = logging.getLogger(__name__)
         self.config = configparser.ConfigParser()
         self.config_filename = os.path.expanduser('~/.damnrc')
         with open(self.config_filename, 'r') as cf_fp:
@@ -38,3 +40,4 @@ class Config(object):
         with open(self.config_filename, 'w') as cf_fp:
             # write out the new config
             self.config.write(cf_fp)
+            self.log.debug('New config file written to disk.')
