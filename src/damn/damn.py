@@ -36,11 +36,12 @@ class DamnApp(object):
         self.log.debug('user id: {0}'.format(self.config.user_id))
 
     def setup_logging(self, debug):
+        log_format = '%(asctime)s {0}'.format(logging.BASIC_FORMAT)
         if debug:
             # we want to turn on debug level logging. also, leave the requests logger at debug as well.
-            logging.basicConfig(level=logging.DEBUG)
+            logging.basicConfig(format=log_format, level=logging.DEBUG)
         else:
-            logging.basicConfig()
+            logging.basicConfig(format=log_format)
             # if we aren't debugging, quiet down the requests logger
             logging.getLogger('requests').setLevel(logging.ERROR)
 
