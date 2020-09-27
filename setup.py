@@ -8,6 +8,12 @@ setup_args = {
     'description': 'Periodically check the discharge rate of the given dam and alert if above some value.',
     'author': 'Bryce Jasmer',
     'author_email': 'b-jazz@users.noreply.github.com',
+    'install_requires': [
+        'Click',
+        'geopy',
+        'requests',
+        'simplejson',
+        ],
 }
 
 
