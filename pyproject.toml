@@ -25,7 +25,8 @@ classifiers = [  #! Update me
   "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-  "click"
+  "click",
+  "requests",
 ]
 
 [project.urls]

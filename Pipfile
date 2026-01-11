@@ -5,8 +5,12 @@ verify_ssl = true
 
 [packages]
 damn = { path = ".", editable = true }
+click = "*"
+requests = "*"
 
 [dev-packages]
+isort = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.13"
